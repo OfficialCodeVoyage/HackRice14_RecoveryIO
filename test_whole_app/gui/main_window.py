@@ -1,9 +1,9 @@
 # gui/main_window.py
 
 from PyQt5.QtWidgets import (QMainWindow, QLabel, QPushButton, QVBoxLayout,
-                             QWidget, QComboBox, QSpinBox, QMessageBox, QHBoxLayout)
+                             QWidget, QComboBox, QSpinBox, QMessageBox, QHBoxLayout, QProgressBar)
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QPixmap, QFont
+from PyQt5.QtGui import QPixmap, QFont, QColor
 
 import cv2
 import sys
@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Rehabilitation Exercise App")
-        self.setGeometry(100, 100, 1300, 800)
+        self.setGeometry(100, 100, 1300, 900)  # Updated window size
 
         # Initialize Pose Estimator
         self.pose_estimator = PoseEstimator()
@@ -66,14 +66,14 @@ class MainWindow(QMainWindow):
 
         # Exercise Selection
         self.exercise_label = QLabel("Exercise:")
-        self.exercise_label.setFont(QFont("Arial", 12))
+        self.exercise_label.setFont(QFont("Arial", 14))
         self.exercise_combo = QComboBox()
         self.exercise_combo.addItems(self.exercises.keys())
         self.exercise_combo.currentTextChanged.connect(self.change_exercise)
 
         # Goal Setting
         self.goal_label = QLabel("Set Goal (Reps):")
-        self.goal_label.setFont(QFont("Arial", 12))
+        self.goal_label.setFont(QFont("Arial", 14))
         self.goal_spinbox = QSpinBox()
         self.goal_spinbox.setRange(1, 1000)
         self.goal_spinbox.setValue(20)  # Default goal
@@ -84,10 +84,10 @@ class MainWindow(QMainWindow):
             QPushButton {
                 background-color: #4CAF50;
                 color: white;
-                padding: 10px;
-                font-size: 14px;
+                padding: 15px;
+                font-size: 16px;
                 border: none;
-                border-radius: 5px;
+                border-radius: 8px;
             }
             QPushButton:hover {
                 background-color: #45a049;
@@ -105,19 +105,51 @@ class MainWindow(QMainWindow):
         # Feedback Label
         self.feedback_label = QLabel("Feedback: Ready")
         self.feedback_label.setAlignment(Qt.AlignCenter)
-        self.feedback_label.setFont(QFont("Arial", 14))
+        self.feedback_label.setFont(QFont("Arial", 16))
         self.feedback_label.setStyleSheet("color: blue;")
+
+        # Real-time Angle Display
+        angles_layout = QHBoxLayout()
+
+        self.knee_angle_label = QLabel("Knee Angle: --°")
+        self.knee_angle_label.setFont(QFont("Arial", 12))
+        self.knee_angle_label.setStyleSheet("color: black;")
+
+        self.back_angle_label = QLabel("Back Angle: --°")
+        self.back_angle_label.setFont(QFont("Arial", 12))
+        self.back_angle_label.setStyleSheet("color: black;")
+
+        angles_layout.addWidget(self.knee_angle_label)
+        angles_layout.addWidget(self.back_angle_label)
 
         # Repetitions and Points
         reps_points_layout = QHBoxLayout()
 
         self.reps_label = QLabel("Repetitions: 0")
-        self.reps_label.setFont(QFont("Arial", 12))
+        self.reps_label.setFont(QFont("Arial", 14))
         self.points_label = QLabel("Points: 0")
-        self.points_label.setFont(QFont("Arial", 12))
+        self.points_label.setFont(QFont("Arial", 14))
 
         reps_points_layout.addWidget(self.reps_label)
         reps_points_layout.addWidget(self.points_label)
+
+        # Progress Bar
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setValue(0)
+        self.progress_bar.setAlignment(Qt.AlignCenter)
+        self.progress_bar.setFormat("Progress: %p%")
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                border: 2px solid grey;
+                border-radius: 5px;
+                text-align: center;
+            }
+
+            QProgressBar::chunk {
+                background-color: #4CAF50;
+                width: 20px;
+            }
+        """)
 
         # Achievement Label
         self.achievement_label = QLabel("Achievements: None")
@@ -127,14 +159,16 @@ class MainWindow(QMainWindow):
 
         # Video Display
         self.video_label = QLabel()
-        self.video_label.setFixedSize(800, 600)  # Increased size
+        self.video_label.setFixedSize(1100, 900)  # Updated size
         self.video_label.setStyleSheet("border: 2px solid #555;")
         self.video_label.setAlignment(Qt.AlignCenter)
 
         # Add all to main layout
         main_layout.addLayout(controls_layout)
         main_layout.addWidget(self.feedback_label)
+        main_layout.addLayout(angles_layout)
         main_layout.addLayout(reps_points_layout)
+        main_layout.addWidget(self.progress_bar)
         main_layout.addWidget(self.achievement_label)
         main_layout.addWidget(self.video_label, alignment=Qt.AlignCenter)
 
@@ -155,6 +189,8 @@ class MainWindow(QMainWindow):
             self.start_button.setText("Stop Exercise")
             self.current_goal = self.goal_spinbox.value()
             self.reset_metrics()
+            self.progress_bar.setMaximum(self.current_goal)
+            self.progress_bar.setValue(0)
         else:
             self.start_button.setText("Start Exercise")
             self.reset_metrics()
@@ -170,6 +206,9 @@ class MainWindow(QMainWindow):
         self.reps_label.setText(f"Repetitions: {self.reps}")
         self.points_label.setText(f"Points: {self.points}")
         self.achievement_label.setText("Achievements: None")
+        self.knee_angle_label.setText("Knee Angle: --°")
+        self.back_angle_label.setText("Back Angle: --°")
+        self.progress_bar.setValue(0)
 
     def update_frame(self):
         """
@@ -181,7 +220,7 @@ class MainWindow(QMainWindow):
             return
 
         frame = cv2.flip(frame, 1)  # Mirror the image
-        frame = cv2.resize(frame, (1100, 900))  # Match video_label size
+        frame = cv2.resize(frame, (1100, 900))  # Updated size to match video_label
         image, results = self.pose_estimator.process_frame(frame)
         image = self.pose_estimator.draw_landmarks(image, results, exercise=self.current_exercise, focus_side='right')
 
@@ -198,15 +237,23 @@ class MainWindow(QMainWindow):
                 self.reps = reps
                 self.feedback = feedback
                 self.reps_label.setText(f"Repetitions: {self.reps}")
+                self.points_label.setText(f"Points: {self.points}")
                 self.feedback_label.setText(f"Feedback: {self.feedback}")
 
+                # Update angles display if available
+                if 'knee_angle' in relevant_landmarks:
+                    self.knee_angle_label.setText(f"Knee Angle: {relevant_landmarks['knee_angle']}°")
+                if 'back_angle' in relevant_landmarks:
+                    self.back_angle_label.setText(f"Back Angle: {relevant_landmarks['back_angle']}°")
+
+                # Update Progress Bar
+                self.progress_bar.setValue(self.reps)
+
                 if feedback == "Good Rep":
-                    self.points = points
-                    self.points_label.setText(f"Points: {self.points}")
                     if achievements:
                         achievement_text = ", ".join(achievements)
                         self.achievement_label.setText(f"Achievements: {achievement_text}")
-                        # QMessageBox.information(self, "Achievement Unlocked", f"{achievements[-1]}")
+                        QMessageBox.information(self, "Achievement Unlocked", f"{achievements[-1]}")
 
                 # Check if goal is reached
                 if self.reps >= self.current_goal:

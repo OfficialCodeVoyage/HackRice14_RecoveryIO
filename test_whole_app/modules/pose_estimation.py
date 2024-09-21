@@ -89,10 +89,7 @@ class PoseEstimator:
                     relevant_landmarks['wrist'] = [landmarks[self.mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
                                                   landmarks[self.mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
             elif exercise == "Back Exercise":
-                # Since MediaPipe doesn't have 'upper_back' and 'lower_back', we calculate them.
-                # 'upper_back' is the midpoint between left and right shoulders.
-                # 'lower_back' is the midpoint between left and right hips.
-                # 'hips' can be the midpoint between left and right hips.
+                # Calculate midpoints for upper_back and lower_back
                 upper_back_x = (landmarks[self.mp_pose.PoseLandmark.LEFT_SHOULDER.value].x +
                                 landmarks[self.mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x) / 2
                 upper_back_y = (landmarks[self.mp_pose.PoseLandmark.LEFT_SHOULDER.value].y +
