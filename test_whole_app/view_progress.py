@@ -40,7 +40,7 @@ def plot_progress(data, exercise='Knee Exercise'):
     reps = [record[2] for record in data]
     points = [record[3] for record in data]
 
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(12, 6))
 
     plt.subplot(1, 2, 1)
     plt.plot(dates, reps, marker='o', linestyle='-')

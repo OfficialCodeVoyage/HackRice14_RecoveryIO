@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Rehabilitation Exercise App")
-        self.setGeometry(100, 100, 900, 700)
+        self.setGeometry(100, 100, 1300, 800)
 
         # Initialize Pose Estimator
         self.pose_estimator = PoseEstimator()
@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
 
         # Video Display
         self.video_label = QLabel()
-        self.video_label.setFixedSize(640, 480)
+        self.video_label.setFixedSize(800, 600)  # Increased size
         self.video_label.setStyleSheet("border: 2px solid #555;")
         self.video_label.setAlignment(Qt.AlignCenter)
 
@@ -181,17 +181,17 @@ class MainWindow(QMainWindow):
             return
 
         frame = cv2.flip(frame, 1)  # Mirror the image
-        frame = cv2.resize(frame, (640, 480))
+        frame = cv2.resize(frame, (1100, 900))  # Match video_label size
         image, results = self.pose_estimator.process_frame(frame)
-        image = self.pose_estimator.draw_landmarks(image, results, focus_side='right')
+        image = self.pose_estimator.draw_landmarks(image, results, exercise=self.current_exercise, focus_side='right')
 
         if self.start_button.text() == "Stop Exercise":
-            relevant_landmarks = self.pose_estimator.get_relevant_landmarks(results, focus_side='right')
+            relevant_landmarks = self.pose_estimator.get_relevant_landmarks(results, exercise=self.current_exercise, focus_side='right')
             if relevant_landmarks:
                 exercise_module = self.exercises[self.current_exercise]
                 try:
                     reps, feedback, points, achievements = exercise_module.process(relevant_landmarks)
-                except Exception as e:
+                except KeyError as e:
                     print(f"Error processing exercise: {e}")
                     reps, feedback, points, achievements = self.reps, "Error", self.points, []
 
