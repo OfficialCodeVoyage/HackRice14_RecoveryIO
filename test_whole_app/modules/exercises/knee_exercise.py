@@ -29,6 +29,7 @@ class KneeExercise:
         - feedback (str): Feedback message.
         - points (int): Total points.
         - achievements (list): List of unlocked achievements.
+        - knee_angle (float): Current knee angle.
         """
         hip = landmarks['hip']
         knee = landmarks['knee']
@@ -46,4 +47,4 @@ class KneeExercise:
             points = self.gamification.get_points()
             achievements = self.gamification.get_achievements().copy()
 
-        return reps, feedback, points, achievements
+        return reps, feedback, points, achievements, angle

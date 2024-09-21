@@ -1,13 +1,15 @@
 # gui/main_window.py
 
 from PyQt5.QtWidgets import (QMainWindow, QLabel, QPushButton, QVBoxLayout,
-                             QWidget, QComboBox, QSpinBox, QMessageBox, QHBoxLayout, QProgressBar)
+                             QWidget, QComboBox, QSpinBox, QMessageBox, QHBoxLayout, QProgressBar, QTextEdit, QGridLayout)
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QPixmap, QFont, QColor
+from PyQt5.QtGui import QPixmap, QFont, QColor, QMovie
 
 import cv2
 import sys
+import os
 
+from test_whole_app.modules.angle_calculator import calculate_angle
 from test_whole_app.modules.pose_estimation import PoseEstimator
 from test_whole_app.modules.exercises.knee_exercise import KneeExercise
 from test_whole_app.modules.exercises.shoulder_exercise import ShoulderExercise
@@ -59,9 +61,41 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
-        main_layout = QVBoxLayout()
+        main_layout = QHBoxLayout()  # Split into left and right columns
 
-        # Top Layout for Controls
+        # Left Column Layout for Video and Tutorial
+        left_layout = QVBoxLayout()
+
+        # Video Display
+        self.video_label = QLabel()
+        self.video_label.setFixedSize(800, 600)  # Adjusted size
+        self.video_label.setStyleSheet("border: 2px solid #555;")
+        self.video_label.setAlignment(Qt.AlignCenter)
+
+        # Tutorial Button
+        self.tutorial_button = QPushButton("View Tutorial")
+        self.tutorial_button.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                padding: 10px;
+                font-size: 14px;
+                border: none;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #0b7dda;
+            }
+        """)
+        self.tutorial_button.clicked.connect(self.view_tutorial)
+
+        left_layout.addWidget(self.video_label, alignment=Qt.AlignCenter)
+        left_layout.addWidget(self.tutorial_button, alignment=Qt.AlignCenter)
+
+        # Right Column Layout for Controls and Instructions
+        right_layout = QVBoxLayout()
+
+        # Top Controls Layout
         controls_layout = QHBoxLayout()
 
         # Exercise Selection
@@ -112,11 +146,11 @@ class MainWindow(QMainWindow):
         angles_layout = QHBoxLayout()
 
         self.knee_angle_label = QLabel("Knee Angle: --°")
-        self.knee_angle_label.setFont(QFont("Arial", 12))
+        self.knee_angle_label.setFont(QFont("Arial", 14))
         self.knee_angle_label.setStyleSheet("color: black;")
 
         self.back_angle_label = QLabel("Back Angle: --°")
-        self.back_angle_label.setFont(QFont("Arial", 12))
+        self.back_angle_label.setFont(QFont("Arial", 14))
         self.back_angle_label.setStyleSheet("color: black;")
 
         angles_layout.addWidget(self.knee_angle_label)
@@ -157,22 +191,51 @@ class MainWindow(QMainWindow):
         self.achievement_label.setFont(QFont("Arial", 12))
         self.achievement_label.setStyleSheet("color: green;")
 
-        # Video Display
-        self.video_label = QLabel()
-        self.video_label.setFixedSize(1100, 900)  # Updated size
-        self.video_label.setStyleSheet("border: 2px solid #555;")
-        self.video_label.setAlignment(Qt.AlignCenter)
+        # Instructions Panel
+        self.instructions_label = QLabel("Instructions:")
+        self.instructions_label.setFont(QFont("Arial", 14))
+        self.instructions_text = QTextEdit()
+        self.instructions_text.setReadOnly(True)
+        self.instructions_text.setFont(QFont("Arial", 12))
+        self.instructions_text.setStyleSheet("""
+            QTextEdit {
+                background-color: #f0f0f0;
+                border: 1px solid #ccc;
+            }
+        """)
+        self.set_instructions("Knee Exercise", """
+- **Stand upright** with feet shoulder-width apart.
+- **Bend your knees** to lower your body as if sitting back into a chair.
+- **Keep your back straight** and chest up.
+- **Lower until your thighs are parallel** to the ground.
+- **Push through your heels** to return to the starting position.
+""")
 
-        # Add all to main layout
-        main_layout.addLayout(controls_layout)
-        main_layout.addWidget(self.feedback_label)
-        main_layout.addLayout(angles_layout)
-        main_layout.addLayout(reps_points_layout)
-        main_layout.addWidget(self.progress_bar)
-        main_layout.addWidget(self.achievement_label)
-        main_layout.addWidget(self.video_label, alignment=Qt.AlignCenter)
+        # Add widgets to right layout
+        right_layout.addLayout(controls_layout)
+        right_layout.addWidget(self.feedback_label)
+        right_layout.addLayout(angles_layout)
+        right_layout.addLayout(reps_points_layout)
+        right_layout.addWidget(self.progress_bar)
+        right_layout.addWidget(self.achievement_label)
+        right_layout.addWidget(self.instructions_label)
+        right_layout.addWidget(self.instructions_text)
+
+        # Add left and right layouts to main layout
+        main_layout.addLayout(left_layout, stretch=2)  # Video and Tutorial
+        main_layout.addLayout(right_layout, stretch=1)  # Controls and Instructions
 
         central_widget.setLayout(main_layout)
+
+    def set_instructions(self, exercise, instructions):
+        """
+        Set instructions based on the selected exercise.
+
+        Parameters:
+        - exercise (str): Current exercise name.
+        - instructions (str): Instruction text.
+        """
+        self.instructions_text.setText(instructions)
 
     def change_exercise(self, exercise_name):
         """
@@ -180,6 +243,55 @@ class MainWindow(QMainWindow):
         """
         self.current_exercise = exercise_name
         self.reset_metrics()
+        # Update instructions based on exercise
+        instructions = self.get_instructions(exercise_name)
+        self.set_instructions(exercise_name, instructions)
+
+    def get_instructions(self, exercise_name):
+        """
+        Retrieve instructions based on the exercise name.
+
+        Parameters:
+        - exercise_name (str): Name of the exercise.
+
+        Returns:
+        - instructions (str): Instruction text.
+        """
+        instructions_dict = {
+            "Knee Exercise": """
+- **Stand upright** with feet shoulder-width apart.
+- **Bend your knees** to lower your body as if sitting back into a chair.
+- **Keep your back straight** and chest up.
+- **Lower until your thighs are parallel** to the ground.
+- **Push through your heels** to return to the starting position.
+""",
+            "Shoulder Exercise": """
+- **Stand or sit upright** with your back straight.
+- **Extend your arms out** to the sides at shoulder height.
+- **Slowly raise your arms** above your head, keeping them straight.
+- **Hold for a moment** at the top.
+- **Lower your arms** back to the starting position.
+- **Repeat** for the desired number of repetitions.
+""",
+            "Back Exercise": """
+- **Stand sideways** to the camera for optimal back alignment.
+- **Place your hands** on your hips.
+- **Slowly bend forward** at the hips, keeping your back straight.
+- **Lower your torso** until it's nearly parallel to the ground.
+- **Hold for a few seconds**.
+- **Return to the starting position** by contracting your back muscles.
+- **Repeat** for the desired number of repetitions.
+""",
+            "Squat Exercise": """
+- **Stand sideways** to the camera with feet shoulder-width apart.
+- **Bend your knees** to lower your body as if sitting back into a chair.
+- **Keep your back straight** and chest up. Focus on the dots on your back to maintain alignment.
+- **Lower until your thighs are parallel** to the ground.
+- **Push through your heels** to return to the starting position.
+- **Repeat** for the desired number of repetitions.
+""",
+        }
+        return instructions_dict.get(exercise_name, "No instructions available.")
 
     def toggle_exercise(self):
         """
@@ -210,6 +322,33 @@ class MainWindow(QMainWindow):
         self.back_angle_label.setText("Back Angle: --°")
         self.progress_bar.setValue(0)
 
+    def view_tutorial(self):
+        """
+        Display the tutorial GIF for the selected exercise.
+        """
+        tutorial_path = os.path.join('tutorials', f"{self.current_exercise.lower().replace(' ', '_')}_exercise.gif")
+        if not os.path.exists(tutorial_path):
+            QMessageBox.warning(self, "Tutorial Not Found", "Tutorial for this exercise is not available.")
+            return
+
+        # Create a new window to display the tutorial
+        self.tutorial_window = QWidget()
+        self.tutorial_window.setWindowTitle(f"{self.current_exercise} Tutorial")
+        self.tutorial_window.setGeometry(150, 150, 600, 400)
+
+        layout = QVBoxLayout()
+        self.tutorial_label = QLabel()
+        self.tutorial_label.setAlignment(Qt.AlignCenter)
+
+        # Load and set the GIF
+        movie = QMovie(tutorial_path)
+        self.tutorial_label.setMovie(movie)
+        movie.start()
+
+        layout.addWidget(self.tutorial_label)
+        self.tutorial_window.setLayout(layout)
+        self.tutorial_window.show()
+
     def update_frame(self):
         """
         Capture video frame, process it, and update the GUI.
@@ -220,7 +359,7 @@ class MainWindow(QMainWindow):
             return
 
         frame = cv2.flip(frame, 1)  # Mirror the image
-        frame = cv2.resize(frame, (1100, 900))  # Updated size to match video_label
+        frame = cv2.resize(frame, (800, 600))  # Adjusted size to match video_label
         image, results = self.pose_estimator.process_frame(frame)
         image = self.pose_estimator.draw_landmarks(image, results, exercise=self.current_exercise, focus_side='right')
 
@@ -234,21 +373,43 @@ class MainWindow(QMainWindow):
                     print(f"Error processing exercise: {e}")
                     reps, feedback, points, achievements = self.reps, "Error", self.points, []
 
+                # Update metrics
                 self.reps = reps
                 self.feedback = feedback
                 self.reps_label.setText(f"Repetitions: {self.reps}")
                 self.points_label.setText(f"Points: {self.points}")
                 self.feedback_label.setText(f"Feedback: {self.feedback}")
 
-                # Update angles display if available
-                if 'knee_angle' in relevant_landmarks:
-                    self.knee_angle_label.setText(f"Knee Angle: {relevant_landmarks['knee_angle']}°")
-                if 'back_angle' in relevant_landmarks:
-                    self.back_angle_label.setText(f"Back Angle: {relevant_landmarks['back_angle']}°")
+                # Update angles display
+                # Assuming that process method can provide angles; if not, adjust accordingly
+                # Here, we calculate angles again for display purposes
+                if self.current_exercise in ["Knee Exercise", "Squat Exercise"]:
+                    hip = relevant_landmarks['hip']
+                    knee = relevant_landmarks['knee']
+                    ankle = relevant_landmarks['ankle']
+                    knee_angle = calculate_angle(hip, knee, ankle)
+                    self.knee_angle_label.setText(f"Knee Angle: {int(knee_angle)}°")
+                elif self.current_exercise == "Back Exercise":
+                    upper_back = relevant_landmarks['upper_back']
+                    lower_back = relevant_landmarks['lower_back']
+                    hips = relevant_landmarks['hips']
+                    back_angle = calculate_angle(upper_back, lower_back, hips)
+                    self.back_angle_label.setText(f"Back Angle: {int(back_angle)}°")
 
                 # Update Progress Bar
                 self.progress_bar.setValue(self.reps)
 
+                # Change feedback label color based on feedback
+                if feedback == "Good Rep":
+                    self.feedback_label.setStyleSheet("color: green;")
+                elif feedback == "Keep Your Back Straight":
+                    self.feedback_label.setStyleSheet("color: red;")
+                elif feedback == "Go Up":
+                    self.feedback_label.setStyleSheet("color: orange;")
+                else:
+                    self.feedback_label.setStyleSheet("color: blue;")
+
+                # Handle Achievements
                 if feedback == "Good Rep":
                     if achievements:
                         achievement_text = ", ".join(achievements)

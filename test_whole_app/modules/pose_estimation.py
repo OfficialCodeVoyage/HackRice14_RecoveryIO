@@ -58,7 +58,7 @@ class PoseEstimator:
         relevant_landmarks = {}
 
         try:
-            if exercise == "Knee Exercise" or exercise == "Squat Exercise":
+            if exercise in ["Knee Exercise", "Squat Exercise"]:
                 if focus_side.lower() == 'left':
                     relevant_landmarks['hip'] = [landmarks[self.mp_pose.PoseLandmark.LEFT_HIP.value].x,
                                                  landmarks[self.mp_pose.PoseLandmark.LEFT_HIP.value].y]
@@ -130,7 +130,7 @@ class PoseEstimator:
         if results.pose_landmarks:
             # Define connections based on exercise
             connections = []
-            if exercise == "Knee Exercise" or exercise == "Squat Exercise":
+            if exercise in ["Knee Exercise", "Squat Exercise"]:
                 if focus_side.lower() == 'left':
                     connections = [
                         (self.mp_pose.PoseLandmark.LEFT_HIP.value, self.mp_pose.PoseLandmark.LEFT_KNEE.value),
@@ -169,7 +169,56 @@ class PoseEstimator:
                 self.mp_drawing.DrawingSpec(color=(245, 117, 66), thickness=2, circle_radius=2),
                 self.mp_drawing.DrawingSpec(color=(245, 66, 230), thickness=2, circle_radius=2)
             )
-        return image
+
+            # Add visual indicators for Squat Exercise to maintain straight back
+            if exercise == "Squat Exercise":
+                # Draw circles on upper_back and lower_back
+                upper_back = [
+                    (results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.LEFT_SHOULDER.value].x +
+                     results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x) / 2,
+                    (results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.LEFT_SHOULDER.value].y +
+                     results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y) / 2
+                ]
+                lower_back = [
+                    (results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.LEFT_HIP.value].x +
+                     results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.RIGHT_HIP.value].x) / 2,
+                    (results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.LEFT_HIP.value].y +
+                     results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.RIGHT_HIP.value].y) / 2
+                ]
+
+                # Convert normalized coordinates to pixel values
+                h, w, _ = image.shape
+                upper_back_pixel = (int(upper_back[0] * w), int(upper_back[1] * h))
+                lower_back_pixel = (int(lower_back[0] * w), int(lower_back[1] * h))
+
+                # Draw circles
+                cv2.circle(image, upper_back_pixel, 10, (0, 255, 0), -1)  # Green dot
+                cv2.circle(image, lower_back_pixel, 10, (0, 255, 0), -1)  # Green dot
+
+                # Draw dotted line between upper_back and lower_back
+                self.draw_dotted_line(image, upper_back_pixel, lower_back_pixel, color=(0, 255, 0), thickness=2, gap=10)
+
+        def draw_dotted_line(self, img, pt1, pt2, color, thickness=1, gap=10):
+            """
+            Draw a dotted line between two points.
+
+            Parameters:
+            - img (numpy.ndarray): The image to draw on.
+            - pt1 (tuple): Starting point (x, y).
+            - pt2 (tuple): Ending point (x, y).
+            - color (tuple): BGR color.
+            - thickness (int): Thickness of the line.
+            - gap (int): Gap between dots.
+            """
+            dist = ((pt2[0] - pt1[0]) ** 2 + (pt2[1] - pt1[1]) ** 2) ** 0.5
+            pts = []
+            for i in range(0, int(dist), gap):
+                r = i / dist
+                x = int((pt2[0] - pt1[0]) * r + pt1[0])
+                y = int((pt2[1] - pt1[1]) * r + pt1[1])
+                pts.append((x, y))
+            for point in pts:
+                cv2.circle(img, point, thickness, color, -1)
 
     def close(self):
         """

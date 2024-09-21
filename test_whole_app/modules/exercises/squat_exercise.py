@@ -38,6 +38,8 @@ class SquatExercise:
         - feedback (str): Feedback message.
         - points (int): Total points.
         - achievements (list): List of unlocked achievements.
+        - knee_angle (float): Current knee angle.
+        - back_angle (float): Current back angle.
         """
         # Calculate back angle
         upper_back = landmarks['upper_back']
@@ -79,4 +81,4 @@ class SquatExercise:
             points = self.gamification.get_points()
             achievements = self.gamification.get_achievements().copy()
 
-        return reps, feedback, points, achievements
+        return reps, feedback, points, achievements, knee_angle, back_angle

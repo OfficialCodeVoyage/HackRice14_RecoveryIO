@@ -24,7 +24,7 @@ class ExerciseCounter:
         Update the exercise counter based on the current angle.
 
         Parameters:
-        - angle (float): The current angle of the knee.
+        - angle (float): The current angle of the joint.
 
         Returns:
         - counter (int): The total number of repetitions.
