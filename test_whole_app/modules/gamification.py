@@ -3,50 +3,45 @@
 class Gamification:
     def __init__(self):
         """
-        Initialize the Gamification system with points and achievements.
+        Initialize the Gamification system.
         """
         self.points = 0
         self.achievements = []
-        self.milestones = {
-            10: "10 Reps",
-            50: "50 Reps",
-            100: "100 Reps",
-            200: "200 Reps"
-        }
 
-    def add_points(self, reps):
+    def add_points(self, points):
         """
-        Add points based on the number of repetitions.
+        Add points to the user's total.
 
         Parameters:
-        - reps (int): Number of repetitions to add points for.
+        - points (int): The number of points to add.
         """
-        self.points += reps * 10  # 10 points per rep
+        self.points += points
         self.check_achievements()
-
-    def check_achievements(self):
-        """
-        Check and update achievements based on current points.
-        """
-        for milestone, achievement in self.milestones.items():
-            if self.points >= milestone and achievement not in self.achievements:
-                self.achievements.append(achievement)
-                print(f"Achievement Unlocked: {achievement}")
 
     def get_points(self):
         """
-        Retrieve the current points.
+        Get the total points.
 
         Returns:
-        - points (int): Total points earned.
+        - int: Total points.
         """
         return self.points
 
     def get_achievements(self):
         """
-        Retrieve the list of unlocked achievements.
+        Get the list of achievements.
 
         Returns:
-        - achievements (list): List of achievement strings.
+        - list: List of achievements.
         """
         return self.achievements
+
+    def check_achievements(self):
+        """
+        Check and unlock achievements based on points.
+        """
+        if self.points >= 50 and "50 Points" not in self.achievements:
+            self.achievements.append("50 Points")
+        if self.points >= 100 and "100 Points" not in self.achievements:
+            self.achievements.append("100 Points")
+        # Add more achievements as needed

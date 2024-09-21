@@ -1,61 +1,73 @@
 # modules/database.py
 
 import sqlite3
+import os
 from datetime import datetime
 
 class ProgressTracker:
-    def __init__(self, db_name='progress.db'):
+    def __init__(self, db_path='progress.db'):
         """
         Initialize the ProgressTracker with a SQLite database.
 
         Parameters:
-        - db_name (str): Name of the SQLite database file.
+        - db_path (str): Path to the SQLite database file.
         """
-        self.conn = sqlite3.connect(db_name)
-        self.c = self.conn.cursor()
-        self.create_tables()
+        self.db_path = db_path
+        self.conn = sqlite3.connect(self.db_path)
+        self.create_table()
 
-    def create_tables(self):
+    def create_table(self):
         """
-        Create the necessary tables in the database if they don't exist.
+        Create the progress table if it doesn't exist.
         """
-        # Progress table
-        self.c.execute('''CREATE TABLE IF NOT EXISTS progress
-                     (date TEXT, exercise TEXT, repetitions INTEGER, points INTEGER)''')
-        # Achievements table
-        self.c.execute('''CREATE TABLE IF NOT EXISTS achievements
-                     (milestone INTEGER PRIMARY KEY, achievement TEXT)''')
-        self.conn.commit()
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS progress (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    exercise TEXT NOT NULL,
+                    repetitions INTEGER NOT NULL,
+                    points INTEGER NOT NULL,
+                    date TEXT NOT NULL
+                )
+            ''')
+            self.conn.commit()
+        except sqlite3.Error as e:
+            print(f"Error creating table: {e}")
 
-    def record_progress(self, exercise, reps, points):
+    def record_progress(self, exercise, repetitions, points):
         """
-        Record the progress of an exercise session.
-
-        Parameters:
-        - exercise (str): Name of the exercise performed.
-        - reps (int): Number of repetitions completed.
-        - points (int): Points earned during the session.
-        """
-        date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.c.execute("INSERT INTO progress (date, exercise, repetitions, points) VALUES (?, ?, ?, ?)",
-                      (date, exercise, reps, points))
-        self.conn.commit()
-
-    def fetch_progress(self, exercise=None):
-        """
-        Fetch all progress records, optionally filtered by exercise.
+        Record the progress of an exercise.
 
         Parameters:
-        - exercise (str, optional): Name of the exercise to filter by.
+        - exercise (str): Name of the exercise.
+        - repetitions (int): Number of repetitions completed.
+        - points (int): Points earned.
+        """
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                INSERT INTO progress (exercise, repetitions, points, date)
+                VALUES (?, ?, ?, ?)
+            ''', (exercise, repetitions, points, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+            self.conn.commit()
+        except sqlite3.Error as e:
+            print(f"Error recording progress: {e}")
+
+    def get_all_progress(self):
+        """
+        Retrieve all progress records.
 
         Returns:
-        - list of tuples: Each tuple contains (date, exercise, repetitions, points).
+        - list of tuples: Each tuple represents a progress record.
         """
-        if exercise:
-            self.c.execute("SELECT * FROM progress WHERE exercise = ?", (exercise,))
-        else:
-            self.c.execute("SELECT * FROM progress")
-        return self.c.fetchall()
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute('SELECT * FROM progress')
+            return cursor.fetchall()
+        except sqlite3.Error as e:
+            print(f"Error fetching progress: {e}")
+            return []
 
     def close(self):
         """

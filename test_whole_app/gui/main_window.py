@@ -1,9 +1,9 @@
 # gui/main_window.py
 
 from PyQt5.QtWidgets import (QMainWindow, QLabel, QPushButton, QVBoxLayout,
-                             QWidget, QComboBox, QSpinBox, QMessageBox, QHBoxLayout, QProgressBar, QTextEdit, QGridLayout, QSpacerItem, QSizePolicy)
+                             QWidget, QComboBox, QSpinBox, QMessageBox, QHBoxLayout, QProgressBar, QTextEdit)
 from PyQt5.QtCore import Qt, QTimer, QSize
-from PyQt5.QtGui import QPixmap, QFont, QColor, QMovie, QIcon
+from PyQt5.QtGui import QPixmap, QFont, QMovie, QIcon
 
 import cv2
 import sys
@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
 
         # Exercise Selection
         self.exercise_label = QLabel("Exercise:")
-        self.exercise_label.setFont(QFont("Arial", 14))
+        self.exercise_label.setFont(QFont("Arial", 18))
         self.exercise_combo = QComboBox()
         self.exercise_combo.addItems(self.exercises.keys())
         self.exercise_combo.setFixedWidth(150)
@@ -113,7 +113,7 @@ class MainWindow(QMainWindow):
 
         # Goal Setting
         self.goal_label = QLabel("Set Goal (Reps):")
-        self.goal_label.setFont(QFont("Arial", 14))
+        self.goal_label.setFont(QFont("Arial", 18))
         self.goal_spinbox = QSpinBox()
         self.goal_spinbox.setRange(1, 1000)
         self.goal_spinbox.setValue(20)  # Default goal
@@ -123,8 +123,10 @@ class MainWindow(QMainWindow):
         self.start_button = QPushButton("Start Exercise")
         self.start_button.setIcon(QIcon(os.path.join('assets', 'icons', 'start.png')))
         self.start_button.setIconSize(QSize(24, 24))
-        self.start_button.setFixedSize(160, 50)
+        self.start_button.setFixedSize(160, 100)
         self.start_button.clicked.connect(self.toggle_exercise)
+
+
 
         # Add widgets to controls layout
         controls_layout.addWidget(self.exercise_label)
@@ -190,11 +192,13 @@ class MainWindow(QMainWindow):
         self.instructions_text = QTextEdit()
         self.instructions_text.setReadOnly(True)
         self.instructions_text.setFont(QFont("Arial", 12))
+        self.instructions_text.setFixedHeight(300)
         self.instructions_text.setStyleSheet("""
             QTextEdit {
                 background-color: #ffffff;
                 border: 1px solid #ccc;
                 border-radius: 5px;
+                font-size: 18px;
             }
         """)
         self.set_instructions("Knee Exercise", """
@@ -339,7 +343,7 @@ class MainWindow(QMainWindow):
         Display the tutorial GIF for the selected exercise.
         """
         tutorial_filename = f"{self.current_exercise.lower().replace(' ', '_')}_exercise.gif"
-        tutorial_path = os.path.join('tutorials', tutorial_filename)
+        tutorial_path = os.path.join('assets', 'tutorials', tutorial_filename)
         if not os.path.exists(tutorial_path):
             QMessageBox.warning(self, "Tutorial Not Found", "Tutorial for this exercise is not available.")
             return
@@ -381,7 +385,6 @@ class MainWindow(QMainWindow):
             if relevant_landmarks:
                 exercise_module = self.exercises[self.current_exercise]
                 try:
-                    # Process landmarks and get angles
                     if self.current_exercise == "Squat Exercise":
                         reps, feedback, points, achievements, knee_angle, back_angle = exercise_module.process(relevant_landmarks)
                         shoulder_angle = None
@@ -438,12 +441,11 @@ class MainWindow(QMainWindow):
                 else:
                     self.feedback_label.setStyleSheet("color: blue;")
 
-                # Handle Achievements (Removed Pop-ups)
+                # Handle Achievements (No Pop-ups)
                 if feedback == "Good Rep":
                     if achievements:
                         achievement_text = ", ".join(achievements)
                         self.achievement_label.setText(f"Achievements: {achievement_text}")
-                        # Removed QMessageBox pop-up to prevent crashes
                         self.status_bar.showMessage(f"Achievement Unlocked: {achievements[-1]}")
 
                 # Check if goal is reached

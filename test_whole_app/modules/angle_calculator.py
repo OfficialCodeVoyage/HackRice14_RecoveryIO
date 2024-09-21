@@ -1,28 +1,40 @@
 # modules/angle_calculator.py
 
-import numpy as np
+import math
 
 def calculate_angle(a, b, c):
     """
-    Calculate the angle at point b given three points a, b, c.
-    Each point is a list or array with two elements: [x, y].
+    Calculate the angle between three points.
 
     Parameters:
-    - a (list or array): Coordinates of the first point (e.g., hip).
-    - b (list or array): Coordinates of the mid point (e.g., knee).
-    - c (list or array): Coordinates of the end point (e.g., ankle).
+    - a (list or tuple): [x, y] coordinates of point a.
+    - b (list or tuple): [x, y] coordinates of point b (vertex).
+    - c (list or tuple): [x, y] coordinates of point c.
 
     Returns:
-    - angle (float): Calculated angle in degrees.
+    - angle (float): The calculated angle in degrees.
     """
-    a = np.array(a)  # First point
-    b = np.array(b)  # Mid point
-    c = np.array(c)  # End point
+    try:
+        a = [a[0], a[1]]
+        b = [b[0], b[1]]
+        c = [c[0], c[1]]
 
-    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
-    angle = np.abs(radians * 180.0 / np.pi)
+        ba = [a[0] - b[0], a[1] - b[1]]
+        bc = [c[0] - b[0], c[1] - b[1]]
 
-    if angle > 180.0:
-        angle = 360 - angle
+        # Calculate the dot product and magnitudes
+        dot_product = ba[0]*bc[0] + ba[1]*bc[1]
+        magnitude_ba = math.sqrt(ba[0]**2 + ba[1]**2)
+        magnitude_bc = math.sqrt(bc[0]**2 + bc[1]**2)
 
-    return angle
+        if magnitude_ba == 0 or magnitude_bc == 0:
+            return 0
+
+        # Calculate the angle in radians and then convert to degrees
+        angle_rad = math.acos(dot_product / (magnitude_ba * magnitude_bc))
+        angle_deg = math.degrees(angle_rad)
+
+        return angle_deg
+    except Exception as e:
+        print(f"Error calculating angle: {e}")
+        return 0

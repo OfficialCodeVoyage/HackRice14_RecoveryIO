@@ -5,25 +5,25 @@ from test_whole_app.modules.gamification import Gamification
 from test_whole_app.modules.angle_calculator import calculate_angle
 
 class BackExercise:
-    def __init__(self, angle_threshold_min=170, angle_threshold_max=190, min_hold_time=0.5):
+    def __init__(self,
+                 back_angle_threshold=160,
+                 min_hold_time=0.5):
         """
         Initialize the BackExercise with specific parameters.
 
         Parameters:
-        - angle_threshold_min (float): Minimum angle to consider the back as straight.
-        - angle_threshold_max (float): Maximum angle to consider the back as straight.
+        - back_angle_threshold (float): Angle above which the back is considered straight.
         - min_hold_time (float): Minimum time in seconds to hold a position before counting.
         """
-        self.back_counter = ExerciseCounter(angle_threshold_min, angle_threshold_max, min_hold_time)
+        self.counter = ExerciseCounter(back_angle_threshold, min_hold_time)
         self.gamification = Gamification()
-        self.correct_position = False  # Flag to track if user is sideways
 
     def process(self, landmarks):
         """
         Process the landmarks to update the back exercise counter and gamification.
 
         Parameters:
-        - landmarks (dict): Contains the x and y coordinates of upper_back, lower_back, and hips.
+        - landmarks (dict): Contains the x and y coordinates of left_shoulder, right_shoulder, left_hip, right_hip.
 
         Returns:
         - reps (int): Total repetitions.
@@ -32,36 +32,28 @@ class BackExercise:
         - achievements (list): List of unlocked achievements.
         - back_angle (float): Current back angle.
         """
-        upper_back = landmarks['upper_back']
-        lower_back = landmarks['lower_back']
-        hips = landmarks['hips']
+        try:
+            left_shoulder = landmarks['left_shoulder']
+            right_shoulder = landmarks['right_shoulder']
+            left_hip = landmarks['left_hip']
+            right_hip = landmarks['right_hip']
 
-        back_angle = calculate_angle(upper_back, lower_back, hips)
+            # Calculate back angle using shoulders and hips
+            hip = [(left_hip[0] + right_hip[0]) / 2, (left_hip[1] + right_hip[1]) / 2]
+            shoulder = [(left_shoulder[0] + right_shoulder[0]) / 2, (left_shoulder[1] + right_shoulder[1]) / 2]
+            back_angle = calculate_angle(left_shoulder, hip, right_shoulder)
 
-        # Check if back is straight
-        if 170 <= back_angle <= 190:
-            self.correct_position = True
-            back_feedback = "Back Straight"
-        else:
-            self.correct_position = False
-            back_feedback = "Keep Your Back Straight"
+            reps, feedback = self.counter.update(back_angle)
 
-        # Update back counter
-        reps, feedback = self.back_counter.update(back_angle)
+            if feedback == "Good Rep":
+                self.gamification.add_points(1)
+                points = self.gamification.get_points()
+                achievements = self.gamification.get_achievements().copy()
+            else:
+                points = self.gamification.get_points()
+                achievements = self.gamification.get_achievements().copy()
 
-        # Combine feedback
-        if self.correct_position:
-            feedback_message = feedback
-        else:
-            feedback_message = back_feedback
-
-        # Only add points if back is in correct position
-        if reps > 0 and self.correct_position:
-            self.gamification.add_points(1)
-            points = self.gamification.get_points()
-            achievements = self.gamification.get_achievements().copy()
-        else:
-            points = self.gamification.get_points()
-            achievements = self.gamification.get_achievements().copy()
-
-        return reps, feedback_message, points, achievements, back_angle
+            return reps, feedback, points, achievements, back_angle
+        except KeyError as e:
+            print(f"Error processing exercise: {e}")
+            return self.counter.count, "Error", self.gamification.get_points(), [], None

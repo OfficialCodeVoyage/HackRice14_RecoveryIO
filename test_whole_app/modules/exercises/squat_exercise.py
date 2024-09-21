@@ -13,7 +13,7 @@ class SquatExercise:
         Initialize the SquatExercise with specific parameters.
 
         Parameters:
-        - knee_angle_threshold (float): Angle above which the squat is considered up.
+        - knee_angle_threshold (float): Angle below which the squat is considered down.
         - back_angle_threshold (float): Angle above which the back is considered straight.
         - min_hold_time (float): Minimum time in seconds to hold a position before counting.
         """
@@ -26,7 +26,7 @@ class SquatExercise:
         Process the landmarks to update the squat exercise counters and gamification.
 
         Parameters:
-        - landmarks (dict): Contains the x and y coordinates of hip, knee, ankle, upper_back, and lower_back.
+        - landmarks (dict): Contains the x and y coordinates of hip, knee, ankle, shoulder_left, shoulder_right.
 
         Returns:
         - reps (int): Total repetitions.
@@ -36,27 +36,34 @@ class SquatExercise:
         - knee_angle (float): Current knee angle.
         - back_angle (float): Current back angle.
         """
-        hip = landmarks['hip']
-        knee = landmarks['knee']
-        ankle = landmarks['ankle']
-        upper_back = landmarks['upper_back']
-        lower_back = landmarks['lower_back']
+        try:
+            hip = landmarks['hip']
+            knee = landmarks['knee']
+            ankle = landmarks['ankle']
+            shoulder_left = landmarks.get('shoulder_left', hip)  # Use hip if shoulder landmarks are missing
+            shoulder_right = landmarks.get('shoulder_right', hip)
 
-        knee_angle = calculate_angle(hip, knee, ankle)
-        back_angle = calculate_angle(upper_back, lower_back, hip)
+            knee_angle = calculate_angle(hip, knee, ankle)
 
-        knee_reps, knee_feedback = self.knee_counter.update(knee_angle)
-        back_reps, back_feedback = self.back_counter.update(back_angle)
+            # Calculate back angle using shoulders and hips
+            avg_shoulder = [(shoulder_left[0] + shoulder_right[0]) / 2, (shoulder_left[1] + shoulder_right[1]) / 2]
+            back_angle = calculate_angle(shoulder_left, hip, shoulder_right)
 
-        reps = min(knee_reps, back_reps)
-        feedback = "Good Rep" if knee_feedback == "Good Rep" and back_feedback == "Good Rep" else "Form Correction Needed"
+            reps_knee, feedback_knee = self.knee_counter.update(knee_angle)
+            reps_back, feedback_back = self.back_counter.update(back_angle)
 
-        if feedback == "Good Rep":
-            self.gamification.add_points(2)
-            points = self.gamification.get_points()
-            achievements = self.gamification.get_achievements().copy()
-        else:
-            points = self.gamification.get_points()
-            achievements = self.gamification.get_achievements().copy()
+            reps = min(reps_knee, reps_back)
+            feedback = "Good Rep" if feedback_knee == "Good Rep" and feedback_back == "Good Rep" else "Form Correction Needed"
 
-        return reps, feedback, points, achievements, knee_angle, back_angle
+            if feedback == "Good Rep":
+                self.gamification.add_points(2)
+                points = self.gamification.get_points()
+                achievements = self.gamification.get_achievements().copy()
+            else:
+                points = self.gamification.get_points()
+                achievements = self.gamification.get_achievements().copy()
+
+            return reps, feedback, points, achievements, knee_angle, back_angle
+        except KeyError as e:
+            print(f"Error processing exercise: {e}")
+            return self.knee_counter.count, "Error", self.gamification.get_points(), [], None, None
