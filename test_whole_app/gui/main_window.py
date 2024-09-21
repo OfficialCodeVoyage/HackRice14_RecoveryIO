@@ -78,6 +78,7 @@ class MainWindow(QMainWindow):
 
         # Left Column Layout for Video and Tutorial
         left_layout = QVBoxLayout()
+        left_layout.setContentsMargins(30, 30, 0, 0)
 
         # Video Display
         self.video_label = QLabel()
@@ -86,10 +87,16 @@ class MainWindow(QMainWindow):
         self.video_label.setAlignment(Qt.AlignCenter)
 
         # Tutorial Button with Icon
-        self.tutorial_button = QPushButton("View Tutorial")
+        self.tutorial_button = QPushButton("  View Tutorial")
         self.tutorial_button.setIcon(QIcon(os.path.join('assets', 'icons', 'tutorial.png')))
-        self.tutorial_button.setIconSize(QSize(24, 24))
-        self.tutorial_button.setFixedSize(150, 40)
+        self.tutorial_button.setIconSize(QSize(36, 36))
+        self.tutorial_button.setFixedSize(200, 40)
+        self.tutorial_button.setStyleSheet("""
+            QPushButton {
+                font-size: 22px;  /* Increase font size for better readability */
+                padding: 10px;    /* Add padding for better spacing */
+            }
+        """)
         self.tutorial_button.clicked.connect(self.view_tutorial)
 
         # Add video and tutorial button to left layout
@@ -99,7 +106,7 @@ class MainWindow(QMainWindow):
 
         # Right Column Layout for Controls and Instructions
         right_layout = QVBoxLayout()
-
+        right_layout.setContentsMargins(0, 30, 30, 0)
         # Top Controls Layout
         controls_layout = QHBoxLayout()
 
@@ -122,8 +129,14 @@ class MainWindow(QMainWindow):
         # Start/Stop Button with Icon
         self.start_button = QPushButton("Start Exercise")
         self.start_button.setIcon(QIcon(os.path.join('assets', 'icons', 'start.png')))
-        self.start_button.setIconSize(QSize(24, 24))
-        self.start_button.setFixedSize(160, 100)
+        self.start_button.setIconSize(QSize(36, 36))
+        self.start_button.setFixedSize(200, 100)
+        self.start_button.setStyleSheet("""
+            QPushButton {
+                font-size: 22px;  /* Increase font size for better readability */
+                padding: 10px;    /* Add padding for better spacing */
+            }
+        """)
         self.start_button.clicked.connect(self.toggle_exercise)
 
 
@@ -202,11 +215,11 @@ class MainWindow(QMainWindow):
             }
         """)
         self.set_instructions("Knee Exercise", """
-- **Stand upright** with feet shoulder-width apart.
-- **Bend your knees** to lower your body as if sitting back into a chair.
-- **Keep your back straight** and chest up.
-- **Lower until your thighs are parallel** to the ground.
-- **Push through your heels** to return to the starting position.
+        <b>1. Stand upright with feet shoulder-width apart.</b>
+        <b><br>2. Bend your knees to lower your body as if sitting back into a chair.</b>
+        <b><br>3. Keep your back straight and chest up.</b>
+        <b><br>4. Lower until your thighs are parallel to the ground.</b>
+        <b><br>5. Push through your heels to return to the starting position.</b>
         """)
 
         # Add widgets to right layout
@@ -245,7 +258,7 @@ class MainWindow(QMainWindow):
         - exercise (str): Current exercise name.
         - instructions (str): Instruction text.
         """
-        self.instructions_text.setText(instructions)
+        self.instructions_text.setText(instructions.lstrip())
 
     def change_exercise(self, exercise_name):
         """
@@ -258,50 +271,58 @@ class MainWindow(QMainWindow):
         self.set_instructions(exercise_name, instructions)
 
     def get_instructions(self, exercise_name):
-        """
-        Retrieve instructions based on the exercise name.
-
-        Parameters:
-        - exercise_name (str): Name of the exercise.
-
-        Returns:
-        - instructions (str): Instruction text.
-        """
         instructions_dict = {
             "Knee Exercise": """
-- **Stand upright** with feet shoulder-width apart.
-- **Bend your knees** to lower your body as if sitting back into a chair.
-- **Keep your back straight** and chest up.
-- **Lower until your thighs are parallel** to the ground.
-- **Push through your heels** to return to the starting position.
-            """,
+    - Stand upright with feet shoulder-width apart.
+    - Bend your knees to lower your body as if sitting back into a chair.
+    - Keep your back straight and chest up.
+    - Lower until your thighs are parallel to the ground.
+    - Push through your heels to return to the starting position.
+                    """,
             "Shoulder Exercise": """
-- **Stand or sit upright** with your back straight.
-- **Extend your arms out** to the sides at shoulder height.
-- **Slowly raise your arms** above your head, keeping them straight.
-- **Hold for a moment** at the top.
-- **Lower your arms** back to the starting position.
-- **Repeat** for the desired number of repetitions.
-            """,
+    - Stand or sit upright with your back straight.
+    - Extend your arms out to the sides at shoulder height.
+    - Slowly raise your arms above your head, keeping them straight.
+    - Hold for a moment at the top.
+    - Lower your arms back to the starting position.
+    - Repeat for the desired number of repetitions.
+                    """,
             "Back Exercise": """
-- **Stand sideways** to the camera for optimal back alignment.
-- **Place your hands** on your hips.
-- **Slowly bend forward** at the hips, keeping your back straight.
-- **Lower your torso** until it's nearly parallel to the ground.
-- **Hold for a few seconds**.
-- **Return to the starting position** by contracting your back muscles.
-- **Repeat** for the desired number of repetitions.
-            """,
+    - Stand sideways to the camera for optimal back alignment.
+    - Place your hands on your hips.
+    - Slowly bend forward at the hips, keeping your back straight.
+    - Lower your torso until it's nearly parallel to the ground.
+    - Hold for a few seconds.
+    - Return to the starting position by contracting your back muscles.
+    - Repeat for the desired number of repetitions.
+                    """,
             "Squat Exercise": """
-- **Stand sideways** to the camera with feet shoulder-width apart.
-- **Bend your knees** to lower your body as if sitting back into a chair.
-- **Keep your back straight** and chest up. Focus on the dots on your back to maintain alignment.
-- **Lower until your thighs are parallel** to the ground.
-- **Push through your heels** to return to the starting position.
-- **Repeat** for the desired number of repetitions.
-            """,
+    - Stand sideways to the camera with feet shoulder-width apart.
+    - Bend your knees to lower your body as if sitting back into a chair.
+    - Keep your back straight and chest up. Focus on the dots on your back to maintain alignment.
+    - Lower until your thighs are parallel to the ground.
+    - Push through your heels to return to the starting position.
+    - Repeat for the desired number of repetitions.
+                    """,
         }
-        return instructions_dict.get(exercise_name, "No instructions available.")
+        instructions = instructions_dict.get(exercise_name, "No instructions available.")
+
+        # Process instructions to add numbering and bold formatting
+        lines = instructions.strip().split('\n')
+        formatted_lines = []
+        step_number = 1
+        for line in lines:
+            line = line.strip()
+            if line.startswith('- '):
+                # Replace '-' with step number and add bold formatting
+                instruction_text = line[2:]  # Remove the '- ' from the beginning
+                formatted_line = f'<b>{step_number}. {instruction_text}</b>'
+                step_number += 1
+            else:
+                formatted_line = line
+            formatted_lines.append(formatted_line)
+        formatted_instructions = '<br>'.join(formatted_lines)
+        return formatted_instructions
 
     def toggle_exercise(self):
         """
