@@ -12,18 +12,31 @@ from exercise_counter import SquatCounter
 from gamification import Gamification
 from database import ProgressTracker
 
+
 def main():
     # Configure logging
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(message)s')
 
     # Initialize components
+    logging.info("Initializing PoseEstimator...")
     pose_estimator = PoseEstimator(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+
+    logging.info("Initializing SquatCounter...")
     squat_counter = SquatCounter(angle_threshold_down=130, angle_threshold_up=170, min_hold_time=0.5)
+
+    logging.info("Initializing Gamification...")
     gamification = Gamification()
+
+    logging.info("Initializing ProgressTracker...")
     progress_tracker = ProgressTracker()
 
     # Initialize video capture
+    logging.info("Setting up video capture...")
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Use DirectShow backend on Windows for better performance
+    if not cap.isOpened():
+        logging.error("Cannot open webcam. Exiting application.")
+        sys.exit("Cannot open webcam.")
+
     frame_width = 640
     frame_height = 480
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
@@ -41,6 +54,10 @@ def main():
 
     while True:
         ret, frame = cap.read()
+        if not ret:
+            logging.warning("Failed to read frame from camera.")
+            continue
+
         current_time = time.time()
         elapsed = current_time - last_time
         if elapsed < frame_duration:
@@ -48,18 +65,13 @@ def main():
             continue
         last_time = current_time
 
-        if not ret:
-            logging.warning("Failed to read frame from camera.")
-            continue
-
         try:
             # Resize frame for performance
             frame = cv2.resize(frame, (frame_width, frame_height))
 
             # Process frame with MediaPipe
             image, results = pose_estimator.process_frame(frame)
-            # Optional: If you want to visualize the landmarks, uncomment the next line
-            # image = pose_estimator.draw_landmarks(image, results)
+            image = pose_estimator.draw_landmarks(image, results)
 
             relevant_landmarks = pose_estimator.get_relevant_landmarks(results, focus_side='right')
 
@@ -88,23 +100,22 @@ def main():
                     # Record progress
                     progress_tracker.record_progress(reps, points)
 
-                # Annotate angle on frame (optional)
-                # Uncomment if you want to see angle annotations
-                # h, w, _ = frame.shape
-                # knee_coords_pixel = (int(knee_coords[0] * w), int(knee_coords[1] * h))
-                # color = (0, 255, 0)  # Green
-                # if feedback == "Too Low!":
-                #     color = (0, 0, 255)  # Red
-                # elif feedback == "Good Rep":
-                #     color = (0, 255, 0)  # Green
-                # else:
-                #     color = (255, 255, 0)  # Yellow
+                # Annotate angle on frame
+                h, w, _ = frame.shape
+                knee_coords_pixel = (int(knee_coords[0] * w), int(knee_coords[1] * h))
+                color = (0, 255, 0)  # Green
+                if feedback == "Too Low!":
+                    color = (0, 0, 255)  # Red
+                elif feedback == "Good Rep":
+                    color = (0, 255, 0)  # Green
+                else:
+                    color = (255, 255, 0)  # Yellow
 
-                # cv2.putText(image, f"{int(angle)}°", knee_coords_pixel, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2, cv2.LINE_AA)
+                cv2.putText(image, f"{int(angle)}°", knee_coords_pixel, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2,
+                            cv2.LINE_AA)
 
-            # Display the image (optional)
-            # Uncomment if you want to see the video feed without landmarks
-            # cv2.imshow('Knee Rehabilitation - Command Line Mode', image)
+            # Display the image
+            cv2.imshow('Knee Rehabilitation - Command Line Mode', image)
 
             # Print feedback to console
             if feedback != "Ready":
@@ -127,6 +138,7 @@ def main():
     pose_estimator.close()
     progress_tracker.close()
     print("Application closed.")
+
 
 if __name__ == "__main__":
     main()
