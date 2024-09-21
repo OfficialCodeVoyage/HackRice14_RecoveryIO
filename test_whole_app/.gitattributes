@@ -1,0 +1,16 @@
+# .gitattributes
+
+# Set the default behavior to automatically normalize line endings
+* text=auto
+
+# Explicitly declare text files you want to always be normalized
+*.py text
+*.txt text
+*.md text
+
+# Declare binary files to be treated as binary and not normalized
+*.png binary
+*.jpg binary
+*.gif binary
+*.db binary
+*.pyc binary
