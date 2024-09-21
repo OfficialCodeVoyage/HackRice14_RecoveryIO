@@ -1,4 +1,3 @@
-# pose_estimation.py
 
 import cv2
 import mediapipe as mp
@@ -77,22 +76,36 @@ class PoseEstimator:
             print(f"Landmark extraction error: {e}")
             return None
 
-    def draw_landmarks(self, image, results):
+    def draw_landmarks(self, image, results, focus_side='right'):
         """
-        Draw pose landmarks on the image.
+        Draw pose landmarks on the image, focusing only on the specified leg.
 
         Parameters:
         - image (numpy.ndarray): The image to draw landmarks on.
         - results (mediapipe.framework.formats.landmark_pb2.NormalizedLandmarkList): Pose estimation results.
+        - focus_side (str): 'left' or 'right' to specify which leg to focus on.
 
         Returns:
         - image (numpy.ndarray): The image with drawn landmarks.
         """
         if results.pose_landmarks:
+            # Define connections for the specified side
+            if focus_side.lower() == 'left':
+                leg_connections = [
+                    (self.mp_pose.PoseLandmark.LEFT_HIP.value, self.mp_pose.PoseLandmark.LEFT_KNEE.value),
+                    (self.mp_pose.PoseLandmark.LEFT_KNEE.value, self.mp_pose.PoseLandmark.LEFT_ANKLE.value)
+                ]
+            else:
+                leg_connections = [
+                    (self.mp_pose.PoseLandmark.RIGHT_HIP.value, self.mp_pose.PoseLandmark.RIGHT_KNEE.value),
+                    (self.mp_pose.PoseLandmark.RIGHT_KNEE.value, self.mp_pose.PoseLandmark.RIGHT_ANKLE.value)
+                ]
+
+            # Draw the leg landmarks
             self.mp_drawing.draw_landmarks(
                 image,
                 results.pose_landmarks,
-                self.mp_pose.POSE_CONNECTIONS,
+                leg_connections,
                 self.mp_drawing.DrawingSpec(color=(245, 117, 66), thickness=2, circle_radius=2),
                 self.mp_drawing.DrawingSpec(color=(245, 66, 230), thickness=2, circle_radius=2)
             )

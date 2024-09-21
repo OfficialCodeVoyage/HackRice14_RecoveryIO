@@ -1,4 +1,3 @@
-# run_app.py
 
 import cv2
 import time
@@ -71,7 +70,7 @@ def main():
 
             # Process frame with MediaPipe
             image, results = pose_estimator.process_frame(frame)
-            image = pose_estimator.draw_landmarks(image, results)
+            image = pose_estimator.draw_landmarks(image, results, focus_side='right')
 
             relevant_landmarks = pose_estimator.get_relevant_landmarks(results, focus_side='right')
 

@@ -9,7 +9,7 @@ def calculate_angle(a, b, c):
 
     Parameters:
     - a (list or array): Coordinates of the first point (e.g., hip).
-    - b (list or array): Coordinates of the mid point (e.g., knee).
+    - b (list or array): Coordinates of the mid-point (e.g., knee).
     - c (list or array): Coordinates of the end point (e.g., ankle).
 
     Returns:

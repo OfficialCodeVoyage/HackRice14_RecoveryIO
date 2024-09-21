@@ -47,7 +47,6 @@ class ProgressTracker:
         return self.c.fetchall()
 
     def close(self):
-
         """
         Close the database connection.
         """
