@@ -1,10 +1,19 @@
 # angle_calculator.py
+
 import numpy as np
 
 def calculate_angle(a, b, c):
     """
     Calculate the angle at point b given three points a, b, c.
     Each point is a list or array with two elements: [x, y].
+
+    Parameters:
+    - a (list or array): Coordinates of the first point (e.g., hip).
+    - b (list or array): Coordinates of the mid point (e.g., knee).
+    - c (list or array): Coordinates of the end point (e.g., ankle).
+
+    Returns:
+    - angle (float): Calculated angle in degrees.
     """
     a = np.array(a)  # First point
     b = np.array(b)  # Mid point

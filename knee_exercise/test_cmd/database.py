@@ -1,14 +1,24 @@
 # database.py
+
 import sqlite3
 from datetime import datetime
 
 class ProgressTracker:
     def __init__(self, db_name='progress.db'):
+        """
+        Initialize the ProgressTracker with a SQLite database.
+
+        Parameters:
+        - db_name (str): Name of the SQLite database file.
+        """
         self.conn = sqlite3.connect(db_name)
         self.c = self.conn.cursor()
         self.create_table()
 
     def create_table(self):
+        """
+        Create the 'progress' table in the database if it doesn't exist.
+        """
         self.c.execute('''CREATE TABLE IF NOT EXISTS progress
                      (date TEXT, repetitions INTEGER, points INTEGER)''')
         self.conn.commit()
@@ -37,4 +47,7 @@ class ProgressTracker:
         return self.c.fetchall()
 
     def close(self):
+        """
+        Close the database connection.
+        """
         self.conn.close()

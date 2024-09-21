@@ -2,6 +2,9 @@
 
 class Gamification:
     def __init__(self):
+        """
+        Initialize the Gamification system with points and achievements.
+        """
         self.points = 0
         self.achievements = []
         self.milestones = {
@@ -31,7 +34,19 @@ class Gamification:
                 print(f"Achievement Unlocked: {achievement}")
 
     def get_points(self):
+        """
+        Retrieve the current points.
+
+        Returns:
+        - points (int): Total points earned.
+        """
         return self.points
 
     def get_achievements(self):
+        """
+        Retrieve the list of unlocked achievements.
+
+        Returns:
+        - achievements (list): List of achievement strings.
+        """
         return self.achievements
