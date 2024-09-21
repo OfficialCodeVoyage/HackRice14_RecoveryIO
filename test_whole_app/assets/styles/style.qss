@@ -1,0 +1,129 @@
+/* assets/styles/style.qss */
+
+/* General Window Styling */
+QWidget {
+    background-color: #f2f2f2;
+    font-family: "Segoe UI", sans-serif;
+    color: #333333;
+}
+
+/* Button Styling */
+QPushButton {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 #4CAF50, stop:1 #45a049);
+    color: white;
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 10px;
+    transition: background-color 0.3s, transform 0.2s;
+    min-height: 40px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+QPushButton:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+QPushButton:pressed {
+    background-color: #3e8e41;
+    transform: scale(0.95);
+}
+
+/* ComboBox Styling */
+QComboBox {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    min-width: 100px;
+    font-size: 14px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #ffffff;
+    selection-background-color: #4CAF50;
+    selection-color: #ffffff;
+    font-size: 14px;
+}
+
+/* SpinBox Styling */
+QSpinBox {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    min-width: 80px;
+    font-size: 14px;
+}
+
+/* ProgressBar Styling */
+QProgressBar {
+    border: 2px solid grey;
+    border-radius: 5px;
+    text-align: center;
+    height: 25px;
+    background-color: #e0e0e0;
+}
+
+QProgressBar::chunk {
+    background-color: #4CAF50;
+    width: 20px;
+    border-radius: 5px;
+}
+
+/* Labels Styling */
+QLabel {
+    color: #333333;
+    font-size: 14px;
+}
+
+/* TextEdit Styling */
+QTextEdit {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 12px;
+}
+
+/* QLineEdit Styling (if used in future) */
+QLineEdit {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    font-size: 14px;
+}
+
+/* Hover Effect for QTextEdit */
+QTextEdit:hover {
+    border: 1px solid #4CAF50;
+}
+
+/* ScrollBar Styling for QTextEdit */
+QScrollBar:vertical {
+    border: none;
+    background: #f0f0f0;
+    width: 12px;
+    margin: 0px 0px 0px 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #4CAF50;
+    min-height: 20px;
+    border-radius: 6px;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+}
+
+/* Status Bar Styling */
+QStatusBar {
+    background-color: #f2f2f2;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 12px;
+}

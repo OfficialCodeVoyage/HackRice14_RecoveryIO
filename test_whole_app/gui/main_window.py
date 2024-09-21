@@ -1,15 +1,14 @@
 # gui/main_window.py
 
 from PyQt5.QtWidgets import (QMainWindow, QLabel, QPushButton, QVBoxLayout,
-                             QWidget, QComboBox, QSpinBox, QMessageBox, QHBoxLayout, QProgressBar, QTextEdit, QGridLayout)
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QPixmap, QFont, QColor, QMovie
+                             QWidget, QComboBox, QSpinBox, QMessageBox, QHBoxLayout, QProgressBar, QTextEdit, QGridLayout, QSpacerItem, QSizePolicy)
+from PyQt5.QtCore import Qt, QTimer, QSize
+from PyQt5.QtGui import QPixmap, QFont, QColor, QMovie, QIcon
 
 import cv2
 import sys
 import os
 
-from test_whole_app.modules.angle_calculator import calculate_angle
 from test_whole_app.modules.pose_estimation import PoseEstimator
 from test_whole_app.modules.exercises.knee_exercise import KneeExercise
 from test_whole_app.modules.exercises.shoulder_exercise import ShoulderExercise
@@ -23,7 +22,10 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Rehabilitation Exercise App")
-        self.setGeometry(100, 100, 1300, 900)  # Updated window size
+        self.setGeometry(100, 100, 1400, 800)  # Increased window size for better layout
+
+        # Apply Style Sheet
+        self.apply_stylesheet()
 
         # Initialize Pose Estimator
         self.pose_estimator = PoseEstimator()
@@ -54,6 +56,17 @@ class MainWindow(QMainWindow):
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(30)  # 30 ms
 
+    def apply_stylesheet(self):
+        """
+        Apply the QSS stylesheet to the application.
+        """
+        style_path = os.path.join('assets', 'styles', 'style.qss')
+        if os.path.exists(style_path):
+            with open(style_path, 'r') as f:
+                self.setStyleSheet(f.read())
+        else:
+            print("Style sheet not found. Proceeding without it.")
+
     def setup_ui(self):
         """
         Setup the main UI components.
@@ -68,29 +81,21 @@ class MainWindow(QMainWindow):
 
         # Video Display
         self.video_label = QLabel()
-        self.video_label.setFixedSize(800, 600)  # Adjusted size
+        self.video_label.setFixedSize(800, 600)  # Adjusted size to fit layout
         self.video_label.setStyleSheet("border: 2px solid #555;")
         self.video_label.setAlignment(Qt.AlignCenter)
 
-        # Tutorial Button
+        # Tutorial Button with Icon
         self.tutorial_button = QPushButton("View Tutorial")
-        self.tutorial_button.setStyleSheet("""
-            QPushButton {
-                background-color: #2196F3;
-                color: white;
-                padding: 10px;
-                font-size: 14px;
-                border: none;
-                border-radius: 5px;
-            }
-            QPushButton:hover {
-                background-color: #0b7dda;
-            }
-        """)
+        self.tutorial_button.setIcon(QIcon(os.path.join('assets', 'icons', 'tutorial.png')))
+        self.tutorial_button.setIconSize(QSize(24, 24))
+        self.tutorial_button.setFixedSize(150, 40)
         self.tutorial_button.clicked.connect(self.view_tutorial)
 
+        # Add video and tutorial button to left layout
         left_layout.addWidget(self.video_label, alignment=Qt.AlignCenter)
         left_layout.addWidget(self.tutorial_button, alignment=Qt.AlignCenter)
+        left_layout.addStretch()
 
         # Right Column Layout for Controls and Instructions
         right_layout = QVBoxLayout()
@@ -103,6 +108,7 @@ class MainWindow(QMainWindow):
         self.exercise_label.setFont(QFont("Arial", 14))
         self.exercise_combo = QComboBox()
         self.exercise_combo.addItems(self.exercises.keys())
+        self.exercise_combo.setFixedWidth(150)
         self.exercise_combo.currentTextChanged.connect(self.change_exercise)
 
         # Goal Setting
@@ -111,29 +117,22 @@ class MainWindow(QMainWindow):
         self.goal_spinbox = QSpinBox()
         self.goal_spinbox.setRange(1, 1000)
         self.goal_spinbox.setValue(20)  # Default goal
+        self.goal_spinbox.setFixedWidth(100)
 
-        # Start/Stop Button
+        # Start/Stop Button with Icon
         self.start_button = QPushButton("Start Exercise")
-        self.start_button.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                padding: 15px;
-                font-size: 16px;
-                border: none;
-                border-radius: 8px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-        """)
+        self.start_button.setIcon(QIcon(os.path.join('assets', 'icons', 'start.png')))
+        self.start_button.setIconSize(QSize(24, 24))
+        self.start_button.setFixedSize(160, 50)
         self.start_button.clicked.connect(self.toggle_exercise)
 
         # Add widgets to controls layout
         controls_layout.addWidget(self.exercise_label)
         controls_layout.addWidget(self.exercise_combo)
+        controls_layout.addSpacing(20)
         controls_layout.addWidget(self.goal_label)
         controls_layout.addWidget(self.goal_spinbox)
+        controls_layout.addSpacing(20)
         controls_layout.addWidget(self.start_button)
 
         # Feedback Label
@@ -147,14 +146,19 @@ class MainWindow(QMainWindow):
 
         self.knee_angle_label = QLabel("Knee Angle: --°")
         self.knee_angle_label.setFont(QFont("Arial", 14))
-        self.knee_angle_label.setStyleSheet("color: black;")
+        self.knee_angle_label.setStyleSheet("color: #333333;")
 
         self.back_angle_label = QLabel("Back Angle: --°")
         self.back_angle_label.setFont(QFont("Arial", 14))
-        self.back_angle_label.setStyleSheet("color: black;")
+        self.back_angle_label.setStyleSheet("color: #333333;")
+
+        self.shoulder_angle_label = QLabel("Shoulder Angle: --°")
+        self.shoulder_angle_label.setFont(QFont("Arial", 14))
+        self.shoulder_angle_label.setStyleSheet("color: #333333;")
 
         angles_layout.addWidget(self.knee_angle_label)
         angles_layout.addWidget(self.back_angle_label)
+        angles_layout.addWidget(self.shoulder_angle_label)
 
         # Repetitions and Points
         reps_points_layout = QHBoxLayout()
@@ -172,20 +176,9 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(0)
         self.progress_bar.setAlignment(Qt.AlignCenter)
         self.progress_bar.setFormat("Progress: %p%")
-        self.progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: 2px solid grey;
-                border-radius: 5px;
-                text-align: center;
-            }
+        self.progress_bar.setFixedHeight(25)
 
-            QProgressBar::chunk {
-                background-color: #4CAF50;
-                width: 20px;
-            }
-        """)
-
-        # Achievement Label
+        # Achievement Label (Removed Pop-ups)
         self.achievement_label = QLabel("Achievements: None")
         self.achievement_label.setAlignment(Qt.AlignCenter)
         self.achievement_label.setFont(QFont("Arial", 12))
@@ -199,8 +192,9 @@ class MainWindow(QMainWindow):
         self.instructions_text.setFont(QFont("Arial", 12))
         self.instructions_text.setStyleSheet("""
             QTextEdit {
-                background-color: #f0f0f0;
+                background-color: #ffffff;
                 border: 1px solid #ccc;
+                border-radius: 5px;
             }
         """)
         self.set_instructions("Knee Exercise", """
@@ -209,23 +203,35 @@ class MainWindow(QMainWindow):
 - **Keep your back straight** and chest up.
 - **Lower until your thighs are parallel** to the ground.
 - **Push through your heels** to return to the starting position.
-""")
+        """)
 
         # Add widgets to right layout
         right_layout.addLayout(controls_layout)
+        right_layout.addSpacing(20)
         right_layout.addWidget(self.feedback_label)
+        right_layout.addSpacing(10)
         right_layout.addLayout(angles_layout)
+        right_layout.addSpacing(10)
         right_layout.addLayout(reps_points_layout)
+        right_layout.addSpacing(10)
         right_layout.addWidget(self.progress_bar)
+        right_layout.addSpacing(10)
         right_layout.addWidget(self.achievement_label)
+        right_layout.addSpacing(20)
         right_layout.addWidget(self.instructions_label)
         right_layout.addWidget(self.instructions_text)
+        right_layout.addStretch()
 
-        # Add left and right layouts to main layout
+        # Add left and right layouts to main layout with margins
         main_layout.addLayout(left_layout, stretch=2)  # Video and Tutorial
+        main_layout.addSpacing(30)  # Add margin between columns
         main_layout.addLayout(right_layout, stretch=1)  # Controls and Instructions
 
         central_widget.setLayout(main_layout)
+
+        # Initialize Status Bar
+        self.status_bar = self.statusBar()
+        self.status_bar.showMessage("Ready")
 
     def set_instructions(self, exercise, instructions):
         """
@@ -264,7 +270,7 @@ class MainWindow(QMainWindow):
 - **Keep your back straight** and chest up.
 - **Lower until your thighs are parallel** to the ground.
 - **Push through your heels** to return to the starting position.
-""",
+            """,
             "Shoulder Exercise": """
 - **Stand or sit upright** with your back straight.
 - **Extend your arms out** to the sides at shoulder height.
@@ -272,7 +278,7 @@ class MainWindow(QMainWindow):
 - **Hold for a moment** at the top.
 - **Lower your arms** back to the starting position.
 - **Repeat** for the desired number of repetitions.
-""",
+            """,
             "Back Exercise": """
 - **Stand sideways** to the camera for optimal back alignment.
 - **Place your hands** on your hips.
@@ -281,7 +287,7 @@ class MainWindow(QMainWindow):
 - **Hold for a few seconds**.
 - **Return to the starting position** by contracting your back muscles.
 - **Repeat** for the desired number of repetitions.
-""",
+            """,
             "Squat Exercise": """
 - **Stand sideways** to the camera with feet shoulder-width apart.
 - **Bend your knees** to lower your body as if sitting back into a chair.
@@ -289,7 +295,7 @@ class MainWindow(QMainWindow):
 - **Lower until your thighs are parallel** to the ground.
 - **Push through your heels** to return to the starting position.
 - **Repeat** for the desired number of repetitions.
-""",
+            """,
         }
         return instructions_dict.get(exercise_name, "No instructions available.")
 
@@ -299,13 +305,17 @@ class MainWindow(QMainWindow):
         """
         if self.start_button.text() == "Start Exercise":
             self.start_button.setText("Stop Exercise")
+            self.start_button.setIcon(QIcon(os.path.join('assets', 'icons', 'stop.png')))
             self.current_goal = self.goal_spinbox.value()
             self.reset_metrics()
             self.progress_bar.setMaximum(self.current_goal)
             self.progress_bar.setValue(0)
+            self.status_bar.showMessage(f"Exercise '{self.current_exercise}' started. Aim for {self.current_goal} reps.")
         else:
             self.start_button.setText("Start Exercise")
+            self.start_button.setIcon(QIcon(os.path.join('assets', 'icons', 'start.png')))
             self.reset_metrics()
+            self.status_bar.showMessage("Exercise stopped.")
 
     def reset_metrics(self):
         """
@@ -320,13 +330,16 @@ class MainWindow(QMainWindow):
         self.achievement_label.setText("Achievements: None")
         self.knee_angle_label.setText("Knee Angle: --°")
         self.back_angle_label.setText("Back Angle: --°")
+        self.shoulder_angle_label.setText("Shoulder Angle: --°")
         self.progress_bar.setValue(0)
+        self.status_bar.showMessage("Metrics reset.")
 
     def view_tutorial(self):
         """
         Display the tutorial GIF for the selected exercise.
         """
-        tutorial_path = os.path.join('tutorials', f"{self.current_exercise.lower().replace(' ', '_')}_exercise.gif")
+        tutorial_filename = f"{self.current_exercise.lower().replace(' ', '_')}_exercise.gif"
+        tutorial_path = os.path.join('tutorials', tutorial_filename)
         if not os.path.exists(tutorial_path):
             QMessageBox.warning(self, "Tutorial Not Found", "Tutorial for this exercise is not available.")
             return
@@ -334,7 +347,7 @@ class MainWindow(QMainWindow):
         # Create a new window to display the tutorial
         self.tutorial_window = QWidget()
         self.tutorial_window.setWindowTitle(f"{self.current_exercise} Tutorial")
-        self.tutorial_window.setGeometry(150, 150, 600, 400)
+        self.tutorial_window.setGeometry(200, 200, 800, 600)
 
         layout = QVBoxLayout()
         self.tutorial_label = QLabel()
@@ -368,10 +381,26 @@ class MainWindow(QMainWindow):
             if relevant_landmarks:
                 exercise_module = self.exercises[self.current_exercise]
                 try:
-                    reps, feedback, points, achievements = exercise_module.process(relevant_landmarks)
+                    # Process landmarks and get angles
+                    if self.current_exercise == "Squat Exercise":
+                        reps, feedback, points, achievements, knee_angle, back_angle = exercise_module.process(relevant_landmarks)
+                        shoulder_angle = None
+                    elif self.current_exercise == "Back Exercise":
+                        reps, feedback, points, achievements, back_angle = exercise_module.process(relevant_landmarks)
+                        knee_angle = None
+                        shoulder_angle = None
+                    elif self.current_exercise == "Shoulder Exercise":
+                        reps, feedback, points, achievements, shoulder_angle = exercise_module.process(relevant_landmarks)
+                        knee_angle = None
+                        back_angle = None
+                    else:  # Knee Exercise
+                        reps, feedback, points, achievements, knee_angle = exercise_module.process(relevant_landmarks)
+                        back_angle = None
+                        shoulder_angle = None
                 except KeyError as e:
                     print(f"Error processing exercise: {e}")
                     reps, feedback, points, achievements = self.reps, "Error", self.points, []
+                    knee_angle, back_angle, shoulder_angle = None, None, None
 
                 # Update metrics
                 self.reps = reps
@@ -381,20 +410,20 @@ class MainWindow(QMainWindow):
                 self.feedback_label.setText(f"Feedback: {self.feedback}")
 
                 # Update angles display
-                # Assuming that process method can provide angles; if not, adjust accordingly
-                # Here, we calculate angles again for display purposes
-                if self.current_exercise in ["Knee Exercise", "Squat Exercise"]:
-                    hip = relevant_landmarks['hip']
-                    knee = relevant_landmarks['knee']
-                    ankle = relevant_landmarks['ankle']
-                    knee_angle = calculate_angle(hip, knee, ankle)
+                if knee_angle is not None:
                     self.knee_angle_label.setText(f"Knee Angle: {int(knee_angle)}°")
-                elif self.current_exercise == "Back Exercise":
-                    upper_back = relevant_landmarks['upper_back']
-                    lower_back = relevant_landmarks['lower_back']
-                    hips = relevant_landmarks['hips']
-                    back_angle = calculate_angle(upper_back, lower_back, hips)
+                else:
+                    self.knee_angle_label.setText("Knee Angle: --°")
+
+                if back_angle is not None:
                     self.back_angle_label.setText(f"Back Angle: {int(back_angle)}°")
+                else:
+                    self.back_angle_label.setText("Back Angle: --°")
+
+                if self.current_exercise == "Shoulder Exercise" and shoulder_angle is not None:
+                    self.shoulder_angle_label.setText(f"Shoulder Angle: {int(shoulder_angle)}°")
+                else:
+                    self.shoulder_angle_label.setText("Shoulder Angle: --°")
 
                 # Update Progress Bar
                 self.progress_bar.setValue(self.reps)
@@ -409,17 +438,20 @@ class MainWindow(QMainWindow):
                 else:
                     self.feedback_label.setStyleSheet("color: blue;")
 
-                # Handle Achievements
+                # Handle Achievements (Removed Pop-ups)
                 if feedback == "Good Rep":
                     if achievements:
                         achievement_text = ", ".join(achievements)
                         self.achievement_label.setText(f"Achievements: {achievement_text}")
-                        QMessageBox.information(self, "Achievement Unlocked", f"{achievements[-1]}")
+                        # Removed QMessageBox pop-up to prevent crashes
+                        self.status_bar.showMessage(f"Achievement Unlocked: {achievements[-1]}")
 
                 # Check if goal is reached
                 if self.reps >= self.current_goal:
                     QMessageBox.information(self, "Goal Reached", f"Congratulations! You reached your goal of {self.current_goal} reps.")
                     self.start_button.setText("Start Exercise")
+                    self.start_button.setIcon(QIcon(os.path.join('assets', 'icons', 'start.png')))
+                    self.status_bar.showMessage(f"Goal reached: {self.current_goal} reps.")
                     # Record progress
                     self.progress_tracker.record_progress(self.current_exercise, self.reps, self.points)
                     self.reset_metrics()

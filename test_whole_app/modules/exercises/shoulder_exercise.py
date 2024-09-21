@@ -5,13 +5,16 @@ from test_whole_app.modules.gamification import Gamification
 from test_whole_app.modules.angle_calculator import calculate_angle
 
 class ShoulderExercise:
-    def __init__(self, angle_threshold_down=60, angle_threshold_up=120, min_hold_time=0.5):
+    def __init__(self,
+                 angle_threshold_up=160,
+                 angle_threshold_down=100,
+                 min_hold_time=0.5):
         """
         Initialize the ShoulderExercise with specific parameters.
 
         Parameters:
-        - angle_threshold_down (float): Angle below which the shoulder lift is considered 'down'.
-        - angle_threshold_up (float): Angle above which the shoulder is considered 'up'.
+        - angle_threshold_up (float): Angle above which the arm is considered raised.
+        - angle_threshold_down (float): Angle below which the arm is considered lowered.
         - min_hold_time (float): Minimum time in seconds to hold a position before counting.
         """
         self.counter = ExerciseCounter(angle_threshold_down, angle_threshold_up, min_hold_time)
@@ -19,7 +22,7 @@ class ShoulderExercise:
 
     def process(self, landmarks):
         """
-        Process the landmarks to update the exercise counter and gamification.
+        Process the landmarks to update the shoulder exercise counter and gamification.
 
         Parameters:
         - landmarks (dict): Contains the x and y coordinates of shoulder, elbow, and wrist.
@@ -29,14 +32,15 @@ class ShoulderExercise:
         - feedback (str): Feedback message.
         - points (int): Total points.
         - achievements (list): List of unlocked achievements.
+        - shoulder_angle (float): Current shoulder angle.
         """
         shoulder = landmarks['shoulder']
         elbow = landmarks['elbow']
         wrist = landmarks['wrist']
 
-        angle = calculate_angle(shoulder, elbow, wrist)
+        shoulder_angle = calculate_angle(shoulder, elbow, wrist)
 
-        reps, feedback = self.counter.update(angle)
+        reps, feedback = self.counter.update(shoulder_angle)
 
         if feedback == "Good Rep":
             self.gamification.add_points(1)
@@ -46,4 +50,4 @@ class ShoulderExercise:
             points = self.gamification.get_points()
             achievements = self.gamification.get_achievements().copy()
 
-        return reps, feedback, points, achievements
+        return reps, feedback, points, achievements, shoulder_angle
