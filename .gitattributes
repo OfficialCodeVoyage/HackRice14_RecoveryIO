@@ -1,2 +1,4 @@
 # .gitattributes
 * text=auto
+*.pyd filter=lfs diff=lfs merge=lfs -text
+*.dll filter=lfs diff=lfs merge=lfs -text
