@@ -15,6 +15,7 @@ def test_webcam():
 
         cv2.imshow('Webcam Test', frame)
 
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
