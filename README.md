@@ -74,3 +74,26 @@ Ensure your webcam is connected and test the motion tracking by running:
 
 ```bash
 python test_webcam.py
+```
+
+Project Structure
+
+```plaintext
+HackRice14_RecoveryIO/
+│
+├── assets/               # Media assets (images, videos, etc.)
+├── gui/                  # GUI-related code and layout
+├── modules/              # Exercise modules (e.g., knee, back exercises)
+├── tutorials/            # Documentation and instructional material
+├── utils/                # Utility functions
+├── .gitignore            # Git ignore rules
+├── README.md             # Project documentation
+├── __init__.py           # Package marker
+├── app.log               # Log file for application errors or events
+├── main.py               # Main entry point for the application
+├── progress.db           # Local database for tracking progress
+├── requirements.txt      # Dependencies list
+├── test_webcam.py        # Script for testing webcam and motion tracking
+└── view_progress.py      # View progress and stats over time
+```
+
