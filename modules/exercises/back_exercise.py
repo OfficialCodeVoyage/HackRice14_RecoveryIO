@@ -41,7 +41,7 @@ class BackExercise:
             # Calculate back angle using shoulders and hips
             hip = [(left_hip[0] + right_hip[0]) / 2, (left_hip[1] + right_hip[1]) / 2]
             shoulder = [(left_shoulder[0] + right_shoulder[0]) / 2, (left_shoulder[1] + right_shoulder[1]) / 2]
-            back_angle = calculate_angle(left_shoulder, hip, right_shoulder)
+            back_angle = calculate_angle(left_shoulder, hip, shoulder)
 
             reps, feedback = self.counter.update(back_angle)
 
