@@ -97,3 +97,48 @@ HackRice14_RecoveryIO/
 └── view_progress.py      # View progress and stats over time
 ```
 
+## Exercises Supported
+
+Currently, the following exercises are supported:
+
+- Knee Bends
+- Squats
+- Leg Raises
+- Back Stretches
+
+Future exercises for other body parts (e.g., shoulder, ankle) will be added in upcoming versions.
+
+## Progress Tracking
+
+User progress is saved in `progress.db`, a SQLite database. You can track your completed exercises, points, and rewards via the app’s built-in visualization features.
+
+## Built With
+
+- **AI**
+- **Computer Vision**
+- **MediaPipe**
+- **OpenCV**
+- **Python**
+- **PyQt5**
+- **Red Bulls** (for keeping us awake!)
+
+## Contributing
+
+We welcome contributions! If you would like to add new features, fix bugs, or suggest improvements, please follow these steps:
+
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature-name`)
+3. Make your changes and commit (`git commit -am 'Add new feature'`)
+4. Push to the branch (`git push origin feature-name`)
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgements
+
+- **HackRice14** for hosting the hackathon that inspired this project. - https://www.hackrice.com/
+- **OpenAI**, **TensorFlow**, **OpenCV** for the core technologies that power the motion tracking and AI feedback.
+
+
