@@ -95,6 +95,7 @@ class MainWindow(QMainWindow):
             QPushButton {
                 font-size: 22px;  /* Increase font size for better readability */
                 padding: 10px;    /* Add padding for better spacing */
+                margin-top: 20px; /* Add top margin */
             }
         """)
         self.tutorial_button.clicked.connect(self.view_tutorial)
@@ -150,10 +151,10 @@ class MainWindow(QMainWindow):
         controls_layout.addSpacing(20)
         controls_layout.addWidget(self.start_button)
 
-        # Feedback Label
+        # Feedback Label (Increase font size to 24 and make bold)
         self.feedback_label = QLabel("Feedback: Ready")
         self.feedback_label.setAlignment(Qt.AlignCenter)
-        self.feedback_label.setFont(QFont("Arial", 16))
+        self.feedback_label.setFont(QFont("Arial", 18, QFont.Bold))
         self.feedback_label.setStyleSheet("color: blue;")
 
         # Real-time Angle Display
@@ -193,10 +194,10 @@ class MainWindow(QMainWindow):
         self.progress_bar.setFormat("Progress: %p%")
         self.progress_bar.setFixedHeight(25)
 
-        # Achievement Label (Removed Pop-ups)
+        # Achievement Label (Increase font size to 18 and make bold)
         self.achievement_label = QLabel("Achievements: None")
         self.achievement_label.setAlignment(Qt.AlignCenter)
-        self.achievement_label.setFont(QFont("Arial", 12))
+        self.achievement_label.setFont(QFont("Arial", 18, QFont.Bold))
         self.achievement_label.setStyleSheet("color: green;")
 
         # Instructions Panel
@@ -205,7 +206,7 @@ class MainWindow(QMainWindow):
         self.instructions_text = QTextEdit()
         self.instructions_text.setReadOnly(True)
         self.instructions_text.setFont(QFont("Arial", 12))
-        self.instructions_text.setFixedHeight(300)
+        self.instructions_text.setFixedHeight(270)
         self.instructions_text.setStyleSheet("""
             QTextEdit {
                 background-color: #ffffff;
@@ -361,30 +362,50 @@ class MainWindow(QMainWindow):
 
     def view_tutorial(self):
         """
-        Display the tutorial GIF for the selected exercise.
+        Display the tutorial GIF for the selected exercise in a pop-up window.
         """
-        tutorial_filename = f"{self.current_exercise.lower().replace(' ', '_')}_exercise.gif"
+        # Mapping of exercises to their respective tutorial GIF filenames
+        exercise_tutorials = {
+            "Knee Exercise": "knee_exercise.gif",
+            "Shoulder Exercise": "shoulder_exercise.gif",
+            "Back Exercise": "back_exercise.gif",
+            "Squat Exercise": "squat_exercise.gif"
+        }
+
+        # Retrieve the appropriate tutorial filename
+        tutorial_filename = exercise_tutorials.get(self.current_exercise, "default_tutorial.gif")
         tutorial_path = os.path.join('assets', 'tutorials', tutorial_filename)
+
+        # Check if the tutorial GIF exists
         if not os.path.exists(tutorial_path):
-            QMessageBox.warning(self, "Tutorial Not Found", "Tutorial for this exercise is not available.")
+            QMessageBox.warning(self, "Tutorial Not Found",
+                                f"Tutorial for '{self.current_exercise}' is not available.")
             return
 
-        # Create a new window to display the tutorial
+        # Create a new window for the tutorial
         self.tutorial_window = QWidget()
         self.tutorial_window.setWindowTitle(f"{self.current_exercise} Tutorial")
-        self.tutorial_window.setGeometry(200, 200, 800, 600)
+        self.tutorial_window.setGeometry(200, 200, 800, 600)  # Adjust size as needed
 
+        # Set up the layout and QLabel to display the GIF
         layout = QVBoxLayout()
-        self.tutorial_label = QLabel()
-        self.tutorial_label.setAlignment(Qt.AlignCenter)
+        tutorial_label = QLabel()
+        tutorial_label.setAlignment(Qt.AlignCenter)
 
-        # Load and set the GIF
+        # Load the GIF using QMovie
         movie = QMovie(tutorial_path)
-        self.tutorial_label.setMovie(movie)
+        if not movie.isValid():
+            QMessageBox.warning(self, "Error",
+                                f"Failed to load the tutorial GIF for '{self.current_exercise}'.")
+            return
+
+        tutorial_label.setMovie(movie)
         movie.start()
 
-        layout.addWidget(self.tutorial_label)
+        layout.addWidget(tutorial_label)
         self.tutorial_window.setLayout(layout)
+
+        # Show the tutorial window
         self.tutorial_window.show()
 
     def update_frame(self):
