@@ -1,8 +1,8 @@
 # modules/exercises/back_exercise.py
 
-from test_whole_app.modules.exercise_counter import ExerciseCounter
-from test_whole_app.modules.gamification import Gamification
-from test_whole_app.modules.angle_calculator import calculate_angle
+from modules.exercise_counter import ExerciseCounter
+from modules.gamification import Gamification
+from modules.angle_calculator import calculate_angle
 
 class BackExercise:
     def __init__(self,

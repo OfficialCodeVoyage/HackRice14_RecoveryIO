@@ -9,13 +9,13 @@ import cv2
 import sys
 import os
 
-from test_whole_app.modules.pose_estimation import PoseEstimator
-from test_whole_app.modules.exercises.knee_exercise import KneeExercise
-from test_whole_app.modules.exercises.shoulder_exercise import ShoulderExercise
-from test_whole_app.modules.exercises.back_exercise import BackExercise
-from test_whole_app.modules.exercises.squat_exercise import SquatExercise
-from test_whole_app.modules.database import ProgressTracker
-from test_whole_app.utils.helper_functions import convert_cv_qt
+from modules.pose_estimation import PoseEstimator
+from modules.exercises.knee_exercise import KneeExercise
+from modules.exercises.shoulder_exercise import ShoulderExercise
+from modules.exercises.back_exercise import BackExercise
+from modules.exercises.squat_exercise import SquatExercise
+from modules.database import ProgressTracker
+from utils.helper_functions import convert_cv_qt
 
 class MainWindow(QMainWindow):
     def __init__(self):

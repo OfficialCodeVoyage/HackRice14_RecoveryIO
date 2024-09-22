@@ -1,11 +1,16 @@
 # .gitattributes
-* text=auto
-*.pyd filter=lfs diff=lfs merge=lfs -text
-*.dll filter=lfs diff=lfs merge=lfs -text
 
+# Set the default behavior to automatically normalize line endings
 * text=auto
 
-* text eol=crlf
+# Explicitly declare text files you want to always be normalized
+*.py text
+*.txt text
+*.md text
 
-*.ipynb text eol=lf
-
+# Declare binary files to be treated as binary and not normalized
+*.png binary
+*.jpg binary
+*.gif binary
+*.db binary
+*.pyc binary

@@ -7,7 +7,7 @@ from PyQt5 import Qt
 from PyQt5.QtGui import QIcon, QMovie
 from PyQt5.QtWidgets import QWidget, QMessageBox, QVBoxLayout, QLabel
 
-from test_whole_app.utils.helper_functions import convert_cv_qt
+from utils.helper_functions import convert_cv_qt
 
 
 class PoseEstimator:
