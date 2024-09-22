@@ -3,6 +3,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
+
 def calculate_angle(a, b, c):
     a = np.array(a)  # First
     b = np.array(b)  # Mid
