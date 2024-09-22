@@ -289,7 +289,7 @@ class MainWindow(QMainWindow):
     - Repeat for the desired number of repetitions.
                     """,
             "Back Exercise": """
-    - Stand sideways to the camera for optimal back alignment.
+    - Stand facing the camera for optimal back alignment.
     - Place your hands on your hips.
     - Slowly bend forward at the hips, keeping your back straight.
     - Lower your torso until it's nearly parallel to the ground.
