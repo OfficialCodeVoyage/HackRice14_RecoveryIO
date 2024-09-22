@@ -1,3 +1,76 @@
-## readme.md later aligator
-## <br>meanwhila watch the video - https://youtu.be/e6AJvzUoDds?si=aJ35G8GFHfQudT8R
-## <br>devpost - https://devpost.com/software/tbd-ir3qd5
+# HackRice14 RecoveryIO
+
+**HackRice14 RecoveryIO (RestoreIO)** is a Python-based, AI-powered rehabilitation application that focuses on helping users recover from knee and other joint injuries. It leverages motion tracking via webcam and provides real-time feedback to ensure users are performing exercises correctly. The app tracks progress, includes gamification elements, and offers various exercises for users to complete as part of their rehabilitation journey.
+
+## Inspiration
+
+RestoreIO was created in response to the demand for an intelligent, customized solution to accelerate healing following an accident or knee replacement surgery. To reduce stiffness in the newly repaired knee, patients typically need to perform daily exercises under the guidance of a physician. However, this procedure can be costly and time-consuming. Our goal was to develop an app that enables patients to monitor their recovery and receive real-time feedback on their form, eliminating the need for ongoing medical supervision.
+
+## What It Does
+
+RestoreIO tracks patients' progress and analyzes their form in real-time during recovery exercises using computer vision. By assisting users in maintaining proper posture throughout rehabilitation activities, it reduces the risk of re-injury or delayed recovery. The software aids in knee replacement recovery by offering tailored workout modifications based on user performance.
+
+## How We Built It
+
+We built RestoreIO as a client-side application with a complete and user-friendly graphical interface using Python in PyCharm. The application incorporates libraries for motion tracking and body movement analysis, such as:
+- **MediaPipe** (from Google) for pose tracking and motion analysis
+- **NumPy** for data manipulation
+- **OpenCV** for video processing
+- **PyQt5** for the graphical interface
+
+This combination allows RestoreIO to provide comprehensive feedback on recovery activities and make form-based improvement suggestions effectively.
+
+## Getting Started
+
+### Prerequisites
+
+Make sure you have the following installed on your system:
+
+- Python 3.8 or higher
+- OpenCV
+- TensorFlow or PyTorch (for AI model handling)
+- Other dependencies listed in `requirements.txt`
+
+### Installation
+
+1. Clone the repository to your local machine:
+
+    ```bash
+    git clone https://github.com/OfficialCodeVoyage/HackRice14_RecoveryIO.git
+    ```
+
+2. Navigate to the project directory:
+
+    ```bash
+    cd HackRice14_RecoveryIO
+    ```
+
+3. Create a virtual environment (optional but recommended):
+
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+    ```
+
+4. Install the required dependencies:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+### Running the Application
+
+1. Start the application by running the `main.py` file:
+
+    ```bash
+    python main.py
+    ```
+
+2. The GUI will launch, allowing you to select exercises and begin your rehabilitation program.
+
+### Testing Webcam Functionality
+
+Ensure your webcam is connected and test the motion tracking by running:
+
+```bash
+python test_webcam.py
