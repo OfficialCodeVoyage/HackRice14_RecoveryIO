@@ -9,8 +9,8 @@ def calculate_angle(a, b, c):
     b = np.array(b)  # Mid
     c = np.array(c)  # End
 
-    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
-    angle = np.abs(radians * 180.0 / np.pi)
+    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])  
+    angle = np.abs(radians * 180.0 / np.pi)    
 
     if angle > 180.0:
         angle = 360 - angle
@@ -30,8 +30,8 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             continue
 
         # Recolor image to RGB
-        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image.flags.writeable = False
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) 
+        image.flags.writeable = False 
 
         # Make detection
         results = pose.process(image)
