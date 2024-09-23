@@ -2,6 +2,9 @@
 
 **HackRice14 RecoveryIO (RestoreIO)** is a Python-based, AI-powered rehabilitation application that focuses on helping users recover from knee and other joint injuries. It leverages motion tracking via webcam and provides real-time feedback to ensure users are performing exercises correctly. The app tracks progress, includes gamification elements, and offers various exercises for users to complete as part of their rehabilitation journey.
 
+![DEMO1](project_img1.jpg)
+![DEMO2](project_img2.jpg)
+
 ## Inspiration
 
 RestoreIO was created in response to the demand for an intelligent, customized solution to accelerate healing following an accident or knee replacement surgery. To reduce stiffness in the newly repaired knee, patients typically need to perform daily exercises under the guidance of a physician. However, this procedure can be costly and time-consuming. Our goal was to develop an app that enables patients to monitor their recovery and receive real-time feedback on their form, eliminating the need for ongoing medical supervision.
